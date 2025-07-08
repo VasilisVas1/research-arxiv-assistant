@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Research System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #a1a1aa;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+
+        .research-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .research-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .agents-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .agents-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #e4e4e7;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .agent-item.idle {
+            border-left-color: #6b7280;
+        }
+
+        .agent-item.active {
+            border-left-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .agent-item.completed {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .agent-item.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .agent-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        .agent-icon.idle {
+            background: #6b7280;
+            animation: none;
+        }
+
+        .agent-icon.active {
+            background: #00d4ff;
+        }
+
+        .agent-icon.completed {
+            background: #10b981;
+            animation: none;
+        }
+
+        .agent-icon.error {
+            background: #ef4444;
+            animation: none;
+        }
+
+        .agent-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .agent-status {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pipeline-visualization {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .pipeline-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #e4e4e7;
+        }
+
+        .pipeline-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .step-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .step-circle.pending {
+            background: rgba(107, 114, 128, 0.3);
+            color: #9ca3af;
+        }
+
+        .step-circle.active {
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .step-circle.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 80px;
+            line-height: 1.3;
+        }
+
+        .pipeline-connector {
+            position: absolute;
+            top: 30px;
+            left: 60px;
+            right: 60px;
+            height: 2px;
+            background: linear-gradient(to right,
+                rgba(107, 114, 128, 0.3) 0%,
+                rgba(0, 212, 255, 0.5) var(--progress, 0%),
+                rgba(107, 114, 128, 0.3) var(--progress, 0%)
+            );
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #e4e4e7;
+        }
+
+        .progress-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .log-timestamp {
+            color: #6b7280;
+            margin-right: 10px;
+        }
+
+        .log-message {
+            color: #e4e4e7;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-info {
+            color: #00d4ff;
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-steps {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .pipeline-connector {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Multi-Agent Research System</h1>
+            <p class="subtitle">AI-Powered Academic Research Pipeline</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="input-section">
+                <div class="input-group">
+                    <label class="input-label" for="research-query">Research Query</label>
+                    <textarea
+                        id="research-query"
+                        class="research-input"
+                        placeholder="Enter your research question here... (e.g., What are the ethical challenges in the use of AI in healthcare?)"
+                    ></textarea>
+                </div>
+                <button class="start-btn" id="start-research">
+                    <span id="btn-text">Start Research Pipeline</span>
+                </button>
+            </div>
+
+            <div class="agents-panel">
+                <h3 class="agents-title">Agent Status</h3>
+                <div class="agent-item idle" id="agent-researchQuestion">
+                    <div class="agent-icon idle"></div>
+                    <div class="agent-name">Research Question Formatter</div>
+                    <div class="agent-status">idle</div>
+                </div>
+                <div class="agent-item idle" id="agent-query">
+                    <div class="agent-icon idle"></div>
+                    <div class="agent-name">Query Expansion</div>
+                    <div class="agent-status">idle</div>
+                </div>
+                <div class="agent-item idle" id="agent-search">
+                    <div class="agent-icon idle"></div>
+                    <div class="agent-name">Search Refinement</div>
+                    <div class="agent-status">idle</div>
+                </div>
+                <div class="agent-item idle" id="agent-arxiv">
+                    <div class="agent-icon idle"></div>
+                    <div class="agent-name">ArXiv Research</div>
+                    <div class="agent-status">idle</div>
+                </div>
+                <div class="agent-item idle" id="agent-pdf">
+                    <div class="agent-icon idle"></div>
+                    <div class="agent-name">PDF Generation</div>
+                    <div class="agent-status">idle</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pipeline-visualization">
+            <h3 class="pipeline-title">Pipeline Progress</h3>
+            <div class="pipeline-steps">
+                <div class="pipeline-connector" id="pipeline-connector"></div>
+                <div class="pipeline-step">
+                    <div class="step-circle pending" id="step-0">0</div>
+                    <div class="step-label">Research Question Formatting</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-circle pending" id="step-1">1</div>
+                    <div class="step-label">Query Expansion</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-circle pending" id="step-2">2</div>
+                    <div class="step-label">Search Refinement</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-circle pending" id="step-3">3</div>
+                    <div class="step-label">Research Papers</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-circle pending" id="step-4">4</div>
+                    <div class="step-label">PDF Generation</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h3 class="progress-title">System Log</h3>
+            <div class="progress-log" id="progress-log">
+                <div class="log-entry">
+                    <span class="log-timestamp">[System]</span>
+                    <span class="log-message">Multi-agent system initialized and ready.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="results-section">
+            <h3 class="progress-title">Research Complete!</h3>
+            <p style="margin-bottom: 20px; color: #a1a1aa;">Your research report has been generated successfully.</p>
+            <a href="#" class="download-btn" id="download-btn">
+                📄 Download Research Report
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let currentSessionId = null;
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const log = document.getElementById('progress-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-message log-${type}">${message}</span>
+            `;
+
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateAgentStatus(agentId, status) {
+            const agent = document.getElementById(agentId);
+            if (!agent) return;
+
+            const icon = agent.querySelector('.agent-icon');
+            const statusText = agent.querySelector('.agent-status');
+
+            agent.className = 'agent-item ' + status;
+            icon.className = 'agent-icon ' + status;
+            statusText.textContent = status;
+        }
+
+        function updatePipelineStep(stepNum, status) {
+            const step = document.getElementById(`step-${stepNum}`);
+            if (!step) return;
+
+            step.className = `step-circle ${status}`;
+
+            const connector = document.getElementById('pipeline-connector');
+            const progress = stepNum * 25; // 100% / 4 intervals = 25% per step
+            connector.style.setProperty('--progress', progress + '%');
+        }
+
+        function resetSystemState() {
+            // Reset ALL agents including Research Question Agent
+            const agents = ['agent-researchQuestion', 'agent-query', 'agent-search', 'agent-arxiv', 'agent-pdf'];
+            agents.forEach(agentId => {
+                updateAgentStatus(agentId, 'idle');
+            });
+
+            for (let i = 0; i <= 4; i++) {
+                updatePipelineStep(i, 'pending');
+            }
+
+            const connector = document.getElementById('pipeline-connector');
+            connector.style.setProperty('--progress', '0%');
+
+            const log = document.getElementById('progress-log');
+            log.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-timestamp">[System]</span>
+                    <span class="log-message">Multi-agent system initialized and ready.</span>
+                </div>
+            `;
+        }
+
+        socket.on('connect', function() {
+            addLogEntry('Connected to server', 'success');
+        });
+
+        socket.on('status_update', function(data) {
+            addLogEntry(data.message, data.type);
+        });
+
+        socket.on('agent_status', function(data) {
+            updateAgentStatus(data.agent_id, data.status);
+        });
+
+        socket.on('pipeline_step', function(data) {
+            updatePipelineStep(data.step, data.status);
+        });
+
+        socket.on('research_complete', function(data) {
+            document.getElementById('results-section').classList.add('show');
+            document.getElementById('download-btn').href = data.download_url;
+
+            const startBtn = document.getElementById('start-research');
+            startBtn.disabled = false;
+            startBtn.innerHTML = 'Start Research Pipeline';
+        });
+
+        async function startResearch(query) {
+            try {
+                const response = await fetch('/api/start_research', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentSessionId = data.session_id;
+
+                    socket.emit('join_session', { session_id: currentSessionId });
+
+                    addLogEntry(`Research session started: ${currentSessionId}`, 'success');
+                    return data;
+                } else {
+                    throw new Error(data.error || 'Failed to start research');
+                }
+            } catch (error) {
+                addLogEntry('Error starting research: ' + error.message, 'error');
+                throw error;
+            }
+        }
+
+        document.getElementById('start-research').addEventListener('click', async function() {
+            const query = document.getElementById('research-query').value.trim();
+
+            if (!query) {
+                addLogEntry('Please enter a research query', 'error');
+                return;
+            }
+
+            const startBtn = this;
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span>🔄 Starting Research...</span>';
+
+            document.getElementById('results-section').classList.remove('show');
+
+            resetSystemState();
+
+            try {
+                await startResearch(query);
+            } catch (error) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = 'Start Research Pipeline';
+            }
+        });
+
+        document.getElementById('research-query').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                document.getElementById('start-research').click();
+            }
+        });
+
+        socket.on('joined_session', function(data) {
+            addLogEntry(`Joined research session: ${data.session_id}`, 'info');
+        });
+
+        socket.on('connect_error', function(error) {
+            addLogEntry('Connection error: ' + error.message, 'error');
+        });
+
+        socket.on('disconnect', function() {
+            addLogEntry('Disconnected from server', 'error');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            addLogEntry('System ready for research queries', 'info');
+        });
+    </script>
+</body>
+</html>
