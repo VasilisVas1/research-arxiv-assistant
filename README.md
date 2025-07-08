@@ -10,7 +10,6 @@ An intelligent multi-agent system that automatically conducts literature reviews
 - **🔍 Intelligent Paper Discovery**: Searches and retrieves relevant academic papers from ArXiv
 - **📊 Multi-Agent Coordination**: Specialized AI agents work together seamlessly
 - **📄 Professional PDF Output**: Generates publication-ready research reports
-- **⚡ Blazing Fast**: Complete research pipeline in under 5 minutes
 - **🎨 Zero Configuration**: Just add your API key and run!
 
 ## 🎬 Demo
@@ -224,14 +223,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Why Star This Project?
-
-- **🚀 Cutting-edge AI**: Multi-agent coordination for research automation
-- **📚 Academic Quality**: Generates publication-ready literature reviews
-- **⚡ Time-Saving**: Hours of research condensed into minutes
-- **🔧 Extensible**: Easy to add new agents and capabilities
-- **🎯 Practical**: Solves real problems for researchers and students
-
 ## 🎯 Roadmap
 
 - [ ] **Google Scholar Integration**: Expand beyond ArXiv
@@ -241,12 +232,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] **Export Formats**: Word, LaTeX, and HTML output
 - [ ] **Language Support**: Multi-language research capabilities
 
-## 📞 Support
-
-- **📧 Email**: support@yourproject.com
-- **💬 Discord**: [Join our community](https://discord.gg/yourserver)
-- **📖 Documentation**: [Full docs](https://docs.yourproject.com)
-- **🐛 Issues**: [GitHub Issues](https://github.com/yourusername/multi-agent-research-system/issues)
 
 ## 🏆 Acknowledgments
 
@@ -258,4 +243,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ If this project helped you, please give it a star! It helps others discover this tool and motivates continued development.**
 
-Made with ❤️ by [Your Name](https://github.com/yourusername)
+Made with ❤️ by [Vasilis Vasiliou](https://vasilisvasileiou.com/)
