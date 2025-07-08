@@ -1,4 +1,4 @@
-# 🤖 Multi-Agent Research System
+# 🤖 Research ArXiv Assistant
 
 > **Transform any research question into a comprehensive academic report in minutes!**
 
@@ -55,22 +55,17 @@ result = coordinator.execute_research_pipeline(
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/VasilisVas1/multi-agent-research-system.git
-   cd multi-agent-research-system
+   git clone https://github.com/VasilisVas1/research-arxiv-assistant.git
+   cd research-arxiv-assistant
    ```
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables**
+2. **Set up environment variables**
    Create a `.env` file in the root directory:
    ```env
    OPENROUTER_API_KEY=your_api_key_here
    ```
 
-4. **Run your first research**
+3. **Run your first research**
    ```bash
    python example.py
    ```
@@ -184,7 +179,7 @@ We welcome contributions! Here's how you can help:
 ### Development Setup
 ```bash
 # Fork the repository
-git clone https://github.com/VasilisVas1/multi-agent-research-system.git
+git clone https://github.com/VasilisVas1/research-arxiv-assistant.git
 
 # Create a feature branch
 git checkout -b feature/amazing-feature
@@ -231,6 +226,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] **Collaboration Features**: Team research capabilities
 - [ ] **Export Formats**: Word, LaTeX, and HTML output
 - [ ] **Language Support**: Multi-language research capabilities
+
 
 
 ## 🏆 Acknowledgments
