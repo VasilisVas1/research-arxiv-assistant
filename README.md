@@ -55,7 +55,7 @@ result = coordinator.execute_research_pipeline(
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/multi-agent-research-system.git
+   git clone https://github.com/VasilisVas1/multi-agent-research-system.git
    cd multi-agent-research-system
    ```
 
@@ -184,7 +184,7 @@ We welcome contributions! Here's how you can help:
 ### Development Setup
 ```bash
 # Fork the repository
-git clone https://github.com/yourusername/multi-agent-research-system.git
+git clone https://github.com/VasilisVas1/multi-agent-research-system.git
 
 # Create a feature branch
 git checkout -b feature/amazing-feature
