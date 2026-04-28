@@ -50,7 +50,10 @@ Create a `.env` file in the project root:
 
 ```
 OPENROUTER_API_KEY=your_key_here
+OPENROUTER_MODEL=openai/gpt-3.5-turbo-0613
 ```
+
+`OPENROUTER_MODEL` is optional and defaults to `openai/gpt-3.5-turbo-0613` if not set. Any instruction-following model available on OpenRouter will work.
 
 ---
 
@@ -121,15 +124,14 @@ Inter-agent communication uses a `MessageBus` with blocking `send_message_and_wa
 
 ## Configuration
 
-The model used for all LLM calls is set in `utils.py`:
+All configuration is handled through the `.env` file:
 
-```python
-"model": "openai/gpt-4o-mini"
-```
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `OPENROUTER_API_KEY` | Yes | — | Your OpenRouter API key |
+| `OPENROUTER_MODEL` | No | `openai/gpt-4o-mini` | Any model available on OpenRouter |
 
-Change this to any model available on OpenRouter. The system prompt structure is compatible with any instruction-following model.
-
-To adjust how many papers are retrieved per search term, modify `max_results` in `ArxivResearchAgent._process_subtask`:
+To adjust how many papers are retrieved per search term, modify `max_results` in `ArxivResearchAgent._process_subtask` in `main5.py`:
 
 ```python
 papers = self._search_arxiv(search_keyword, max_results=3)
